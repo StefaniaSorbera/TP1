@@ -1,96 +1,117 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+#pragma once // Evita que este header se incluya múltiples veces
 
-#pragma once
+#include "CoreMinimal.h" // Tipos básicos y utilidades de Unreal
+#include "GameFramework/Character.h" // Clase base ACharacter (personaje con movimiento y animación)
+#include "Logging/LogMacros.h" // Macros para crear logs
+#include "MyLittleProject3Character.generated.h" // Necesario para el sistema de reflexión de Unreal
 
-#include "CoreMinimal.h"
-#include "GameFramework/Character.h"
-#include "Logging/LogMacros.h"
-#include "MyLittleProject3Character.generated.h"
+// Declaraciones adelantadas (forward declarations)
+class USpringArmComponent; // Brazo elástico de la cámara
+class UCameraComponent;    // Componente de cámara
+class UInputAction;        // Acción de entrada del sistema Enhanced Input
+struct FInputActionValue;  // Valor que reciben las acciones de entrada
 
-class USpringArmComponent;
-class UCameraComponent;
-class UInputAction;
-struct FInputActionValue;
-
+// Declaración de una categoría de log para este personaje
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
 /**
- *  A simple player-controllable third person character
- *  Implements a controllable orbiting camera
+ *  Personaje jugable en tercera persona
+ *  Incluye cámara orbitante controlable por el jugador
  */
-UCLASS(abstract)
+UCLASS(abstract) // Clase abstracta (no se puede instanciar directamente en C++, pero sí extender en Blueprint)
 class AMyLittleProject3Character : public ACharacter
 {
 	GENERATED_BODY()
 
-	/** Camera boom positioning the camera behind the character */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components", meta = (AllowPrivateAccess = "true"))
+	/** Camera boom que posiciona la cámara detrás del personaje */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	USpringArmComponent* CameraBoom;
 
-	/** Follow camera */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components", meta = (AllowPrivateAccess = "true"))
+	/** Cámara que sigue al personaje */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FollowCamera;
-	
+
 protected:
 
-	/** Jump Input Action */
-	UPROPERTY(EditAnywhere, Category="Input")
+	/** Acción de entrada para saltar */
+	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* JumpAction;
 
-	/** Move Input Action */
-	UPROPERTY(EditAnywhere, Category="Input")
+	/** Acción de entrada para moverse */
+	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* MoveAction;
 
-	/** Look Input Action */
-	UPROPERTY(EditAnywhere, Category="Input")
+	/** Acción de entrada para mirar (ej: joystick derecho) */
+	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* LookAction;
 
-	/** Mouse Look Input Action */
-	UPROPERTY(EditAnywhere, Category="Input")
+	/** Acción de entrada para mirar con el ratón */
+	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* MouseLookAction;
+
+	/** Acción de entrada para mostrar mensaje */
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* MostrarMensajeAction;
+	
+	/** Acción de entrada para ocultar */
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* OcultarAction;
+
+	/** Acción de entrada para rotar */
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* RotarAction;
+
 
 public:
 
-	/** Constructor */
-	AMyLittleProject3Character();	
+	/** Constructor por defecto */
+	AMyLittleProject3Character();
 
 protected:
 
-	/** Initialize input action bindings */
+	/** Configura los bindings de entrada (vincula acciones a funciones) */
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 protected:
 
-	/** Called for movement input */
+	/** Maneja la entrada de movimiento (recibe un vector 2D del input) */
 	void Move(const FInputActionValue& Value);
 
-	/** Called for looking input */
+	/** Maneja la entrada de mirar (recibe un vector 2D del input) */
 	void Look(const FInputActionValue& Value);
 
 public:
 
-	/** Handles move inputs from either controls or UI interfaces */
-	UFUNCTION(BlueprintCallable, Category="Input")
+	/** Función BlueprintCallable: mueve al personaje según valores X/Y (derecha/adelante) */
+	UFUNCTION(BlueprintCallable, Category = "Input")
 	virtual void DoMove(float Right, float Forward);
 
-	/** Handles look inputs from either controls or UI interfaces */
-	UFUNCTION(BlueprintCallable, Category="Input")
+	/** Función BlueprintCallable: rota cámara/personaje según valores de Yaw/Pitch */
+	UFUNCTION(BlueprintCallable, Category = "Input")
 	virtual void DoLook(float Yaw, float Pitch);
 
-	/** Handles jump pressed inputs from either controls or UI interfaces */
-	UFUNCTION(BlueprintCallable, Category="Input")
+	/** Función BlueprintCallable: inicia salto (cuando se presiona el botón de salto) */
+	UFUNCTION(BlueprintCallable, Category = "Input")
 	virtual void DoJumpStart();
 
-	/** Handles jump pressed inputs from either controls or UI interfaces */
-	UFUNCTION(BlueprintCallable, Category="Input")
+	/** Función BlueprintCallable: termina salto (cuando se suelta el botón de salto) */
+	UFUNCTION(BlueprintCallable, Category = "Input")
 	virtual void DoJumpEnd();
+
+	UFUNCTION(BlueprintCallable, Category = "Input")
+	virtual void DoMostrarMensaje();
+
+	UFUNCTION(BlueprintCallable, Category = "Input")
+	virtual void DoOcultar();
+
+	UFUNCTION(BlueprintCallable, Category = "Input")
+	virtual void DoRotar();
 
 public:
 
-	/** Returns CameraBoom subobject **/
+	/** Getter para el CameraBoom */
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 
-	/** Returns FollowCamera subobject **/
+	/** Getter para la FollowCamera */
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 };
-
